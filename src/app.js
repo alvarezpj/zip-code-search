@@ -2,54 +2,39 @@ import React from 'react';
 import './styles.css';
 
 
-// Banner component
-class Banner extends React.Component {
-  render() {
-    return (
-      <div className="banner">
-        <h1>Zip Code Search</h1>
-      </div>
-    );
-  }
-}
-
-class ZipCodeForm extends React.Component {
+export class App extends React.Component {
+  // main app component class
   constructor(props) {
     super(props);
     this.state = {
-      isFetching: true,
-      cityInfo: [],
+      cities: []
     };
 
     this.handleChange = this.handleChange.bind(this);
+  }
+
+  extractCityInfo(json) {
+    return {
+      locationText: json.LocationText,
+      state: json.State,
+      location: `(${json.Lat}, ${json.Long})`,
+      population: json.EstimatedPopulation,
+      totalWages: json.TotalWages
+    }
+  }
+
+  getCities(json) {
+    return json.map(city => this.extractCityInfo(city));
   }
 
   fetchZipCodeInfo(zipCode) {
     // fetch zip code information
     if(zipCode.length === 5) {
       fetch(`http://ctp-zip-api.herokuapp.com/zip/${zipCode}`)
-        .then(function(response) {
-          return response.json();
-        }).then(function(json) {
-          const array = json.map(function(city) {
-            return {
-              locationText: city.LocationText,
-              state: city.State,
-              location: `(${city.Lat}, ${city.Long})`,
-              population: city.EstimatedPopulation,
-              totalWages: city.TotalWages,
-            }});
-          return array;
-        }).then(function(zipInfo) {
-          console.log(zipInfo);
-          const cards = zipInfo.map(city => <CityCard data={city} />);
-          this.setState({
-            cityInfo: cards,
-          });
-        }).catch(function(ex) {
-          console.log(ex);
-          return "Cannot Resolve";
-        });
+        .then(response => response.json()
+        ).then(json => this.getCities(json)
+        ).then(zipInfo => this.setState({ cities: zipInfo.map((city, i) => <CityCard data={city} key={"city_" + i} />) })
+        ).catch(ex => console.log(ex));
     }
   }
 
@@ -60,12 +45,24 @@ class ZipCodeForm extends React.Component {
   render() {
     return (
       <div>
+        <div className="banner">
+          <h1>Zip Code Search</h1>
+        </div>
+        <div>
           <form className="zipform">
             <label>
               <b>Zip Code: </b>
             </label>
             <input type="text" placeholder={"try 10001"} onChange={this.handleChange} />
           </form>
+        </div>
+        <div>
+          {
+            this.state.cities.length > 0 ?
+            <div>{this.state.cities}</div> :
+            <div className="notfound">Not Found</div>
+          }
+        </div>
       </div>
     );
   }
@@ -89,19 +86,6 @@ class CityCard extends React.Component {
             </ul>
           </div>
         </div>
-      </div>
-    );
-  }
-}
-
-// App component
-export class App extends React.Component {
-  // main app component
-  render() {
-    return (
-      <div>
-        <Banner />
-        <ZipCodeForm />
       </div>
     );
   }
