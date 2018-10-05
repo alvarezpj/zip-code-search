@@ -1,5 +1,23 @@
 .banner {
   color: white;
-  background-color: #872D62;
-  height: 100px;
+  background-image: linear-gradient(to bottom, #000000, #626262);
+  padding: 20px 0px 20px 0px;
+  text-align: center;
+}
+
+.zipform {
+  width: 300px;
+  margin: 20px auto;
+}
+
+.citycard {
+  border: 1px solid #DBDBDB;
+  margin: 10px auto;
+  width: 400px;
+}
+
+.citycardheader {
+  background-color: #DBDBDB;
+  padding: 10px 10px 10px 10px;
+  font-weight: bold;
 }
