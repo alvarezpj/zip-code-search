@@ -27,14 +27,26 @@ export class App extends React.Component {
     return json.map(city => this.extractCityInfo(city));
   }
 
+  createCards(zipInfo) {
+    if(typeof zipInfo === 'string') {
+      return <div className="notfound">Not Found</div>;
+    } else {
+      return zipInfo.map((city, i) => <CityCard data={city} key={"city_" + i} />);
+    }
+  }
+
   fetchZipCodeInfo(zipCode) {
     // fetch zip code information
-    if(zipCode.length === 5) {
+    if(zipCode.length === 0) {
+      this.setState({ cities: [] });
+    } else if(zipCode.length === 5) {
       fetch(`http://ctp-zip-api.herokuapp.com/zip/${zipCode}`)
         .then(response => response.json()
         ).then(json => this.getCities(json)
-        ).then(zipInfo => this.setState({ cities: zipInfo.map((city, i) => <CityCard data={city} key={"city_" + i} />) })
+        ).then(zipInfo => this.setState({ cities: this.createCards(zipInfo) })
         ).catch(ex => console.log(ex));
+    } else {
+      this.setState({ cities: this.createCards("Not Found") });
     }
   }
 
@@ -56,13 +68,7 @@ export class App extends React.Component {
             <input type="text" placeholder={"try 10001"} onChange={this.handleChange} />
           </form>
         </div>
-        <div>
-          {
-            this.state.cities.length > 0 ?
-            <div>{this.state.cities}</div> :
-            <div className="notfound">Not Found</div>
-          }
-        </div>
+        <div>{this.state.cities}</div>
       </div>
     );
   }
